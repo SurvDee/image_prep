@@ -1,39 +1,49 @@
 import cv2
 import os
 
-def split_rgb_channels(input_folder, output_folder):
-    # Ensure the output folder exists
-    os.makedirs(output_folder, exist_ok=True)
+def split_rgb_channels(input_folder):
+    # Define paths for the R, G, and B folders
+    red_folder = os.path.join(input_folder, 'RED')
+    green_folder = os.path.join(input_folder, 'GREEN')
+    blue_folder = os.path.join(input_folder, 'BLUE')
 
-    for filename in os.listdir(input_folder):
-        if filename.endswith(('.png', '.jpg', '.tif')):  # Adjust for your file format
-            filepath = os.path.join(input_folder, filename)
+    # Create folders if they don't already exist
+    os.makedirs(red_folder, exist_ok=True)
+    os.makedirs(green_folder, exist_ok=True)
+    os.makedirs(blue_folder, exist_ok=True)
 
-            # Read the image
-            image = cv2.imread(filepath)
+    # List all files in the input folder
+    for image_file in os.listdir(input_folder):
+        # Check if the file is an RGB image
+        if image_file.lower().endswith('-rgb_512px.png'):
+            image_path = os.path.join(input_folder, image_file)
+
+            # Load the RGB image
+            image = cv2.imread(image_path)
             if image is None:
-                print(f"Skipping {filename}: Unable to read the image.")
+                print(f"Error loading image: {image_path}")
                 continue
 
-            # Split into R, G, B channels
-            blue, green, red = cv2.split(image)
+            # Split the image into R, G, B channels
+            blue_channel, green_channel, red_channel = cv2.split(image)
 
-            # Save each channel as a separate file
-            base_name = filename.rsplit('.', 1)[0]  # Get filename without extension
+            # Extract the base name without the '-RGB_512px' part
+            base_name = image_file.replace('-RGB_512px.png', '')
 
-            red_path = os.path.join(output_folder, f"{base_name}-RED_512px.png")
-            green_path = os.path.join(output_folder, f"{base_name}-GREEN_512px.png")
-            blue_path = os.path.join(output_folder, f"{base_name}-BLUE_512px.png")
+            # Save each channel as a separate image in its designated folder
+            red_image_path = os.path.join(red_folder, f"{base_name}-RED_512px.png")
+            green_image_path = os.path.join(green_folder, f"{base_name}-GREEN_512px.png")
+            blue_image_path = os.path.join(blue_folder, f"{base_name}-BLUE_512px.png")
 
-            cv2.imwrite(red_path, red)
-            cv2.imwrite(green_path, green)
-            cv2.imwrite(blue_path, blue)
+            cv2.imwrite(red_image_path, red_channel)
+            cv2.imwrite(green_image_path, green_channel)
+            cv2.imwrite(blue_image_path, blue_channel)
 
-            print(f"Saved: {red_path}, {green_path}, {blue_path}")
+            print(f"Saved {red_image_path}, {green_image_path}, and {blue_image_path}")
+        else:
+            print(f"Skipping non-RGB file: {image_file}")
 
-# Input and output directories
-input_folder = "D:\\PG\\3rd_semester\\Data\\Project_Data\\work\\images"  # Path to the input images
-output_folder = "D:\\PG\\3rd_semester\\Data\\Project_Data\\work\\separated_bands"  # Path to save RGB channels
+# Example usage
+input_folder = 'D:\\PG\\3rd_semester\\Data\\Project_Data\\work\\splitted_sorted\\images_cloud\\1_rgb\\bev_cld_00116-RGB'  # Replace with your folder path
+split_rgb_channels(input_folder)
 
-# Run the function
-split_rgb_channels(input_folder, output_folder)
