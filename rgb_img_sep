@@ -1,0 +1,39 @@
+import cv2
+import os
+
+def split_rgb_channels(input_folder, output_folder):
+    # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+
+    for filename in os.listdir(input_folder):
+        if filename.endswith(('.png', '.jpg', '.tif')):  # Adjust for your file format
+            filepath = os.path.join(input_folder, filename)
+
+            # Read the image
+            image = cv2.imread(filepath)
+            if image is None:
+                print(f"Skipping {filename}: Unable to read the image.")
+                continue
+
+            # Split into R, G, B channels
+            blue, green, red = cv2.split(image)
+
+            # Save each channel as a separate file
+            base_name = filename.rsplit('.', 1)[0]  # Get filename without extension
+
+            red_path = os.path.join(output_folder, f"{base_name}-RED_512px.png")
+            green_path = os.path.join(output_folder, f"{base_name}-GREEN_512px.png")
+            blue_path = os.path.join(output_folder, f"{base_name}-BLUE_512px.png")
+
+            cv2.imwrite(red_path, red)
+            cv2.imwrite(green_path, green)
+            cv2.imwrite(blue_path, blue)
+
+            print(f"Saved: {red_path}, {green_path}, {blue_path}")
+
+# Input and output directories
+input_folder = "D:\\PG\\3rd_semester\\Data\\Project_Data\\work\\images"  # Path to the input images
+output_folder = "D:\\PG\\3rd_semester\\Data\\Project_Data\\work\\separated_bands"  # Path to save RGB channels
+
+# Run the function
+split_rgb_channels(input_folder, output_folder)
